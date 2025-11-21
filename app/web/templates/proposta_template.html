@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Proposta de Sistema de Energia Solar - LEVESOL">
-    <title>Proposta {{ numero_proposta }} - {{ cliente.nome }} | LEVESOL</title>
+    <meta name="description" content="Proposta de Energia Solar - Economia garantida e sustentabilidade">
+    <title>Sua Proposta de Energia Solar | LEVESOL</title>
     
     <style>
         * {
@@ -13,597 +13,847 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --primary-dark: #0a0e27;
+            --secondary-dark: #141b2d;
+            --accent-solar: #fdb515;
+            --accent-orange: #ff6b35;
+            --text-light: #e8eaf6;
+            --text-gray: #b0b8c1;
+            --success-green: #00e676;
+            --gradient-solar: linear-gradient(135deg, #fdb515 0%, #ff6b35 100%);
+            --gradient-dark: linear-gradient(180deg, #0a0e27 0%, #141b2d 100%);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-light);
             line-height: 1.6;
+            overflow-x: hidden;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        /* CABEÇALHO */
-        .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 60px 40px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
+        /* NAVBAR FIXA */
+        .navbar {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%23ffffff"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23ffffff"/></svg>') no-repeat bottom;
-            background-size: 100% 100px;
-            opacity: 0.1;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .header p {
-            font-size: 1.3em;
-            opacity: 0.95;
-            font-weight: 300;
-        }
-        
-        .header .proposta-numero {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 10px 30px;
-            border-radius: 50px;
-            margin-top: 20px;
-            font-weight: 500;
+            background: rgba(10, 14, 39, 0.95);
             backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(253, 181, 21, 0.1);
         }
         
-        /* SEÇÕES */
-        .section {
-            padding: 50px 40px;
-            border-bottom: 1px solid #ecf0f1;
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .section:last-of-type {
-            border-bottom: none;
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-solar);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .section h2 {
-            color: #2c3e50;
-            font-size: 2em;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #3498db;
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-solar);
+        }
+        
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            gap: 15px;
-        }
-        
-        .section h2::before {
-            content: attr(data-icon);
-            font-size: 1.2em;
-        }
-        
-        /* GRID DE INFORMAÇÕES */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-top: 25px;
-        }
-        
-        .info-item {
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            border-left: 4px solid #3498db;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .info-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
-        }
-        
-        .info-item label {
-            font-weight: 600;
-            color: #7f8c8d;
-            font-size: 0.85em;
-            display: block;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .info-item span {
-            color: #2c3e50;
-            font-size: 1.15em;
-            font-weight: 500;
-            display: block;
-            word-wrap: break-word;
-        }
-        
-        /* CAIXAS DE DESTAQUE */
-        .highlight-box {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+            justify-content: center;
+            background: var(--gradient-dark);
             position: relative;
+            padding: 120px 30px 80px;
             overflow: hidden;
         }
         
-        .highlight-box::before {
+        .hero::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(253, 181, 21, 0.1) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            animation: pulse 4s ease-in-out infinite;
         }
         
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
+            0%, 100% { transform: scale(1); opacity: 0.5; }
             50% { transform: scale(1.1); opacity: 0.8; }
         }
         
-        .highlight-box h3 {
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            font-weight: 400;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        .hero-content {
+            max-width: 1200px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
         }
         
-        .highlight-box .value {
-            font-size: 3em;
+        .hero-badge {
+            display: inline-block;
+            background: rgba(253, 181, 21, 0.1);
+            border: 1px solid var(--accent-solar);
+            color: var(--accent-solar);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+        
+        .hero-name {
+            background: var(--gradient-solar);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-gray);
+            margin-bottom: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .hero-investment {
+            background: linear-gradient(135deg, rgba(253, 181, 21, 0.15), rgba(255, 107, 53, 0.15));
+            border: 2px solid var(--accent-solar);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto 40px;
+        }
+        
+        .hero-investment-label {
+            font-size: 14px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .hero-investment-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent-solar);
+            margin-bottom: 10px;
+        }
+        
+        .hero-investment-note {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--gradient-solar);
+            color: var(--primary-dark);
+            padding: 18px 50px;
+            border-radius: 50px;
+            text-decoration: none;
             font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 1;
+            font-size: 18px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(253, 181, 21, 0.3);
         }
         
-        .highlight-box p {
-            margin-top: 15px;
-            opacity: 0.95;
-            font-size: 0.95em;
-            position: relative;
-            z-index: 1;
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(253, 181, 21, 0.4);
         }
         
-        .highlight-box.warning {
-            background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
-            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.3);
+        /* SECTIONS */
+        .section {
+            padding: 100px 30px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        /* TABELAS */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-badge {
+            display: inline-block;
+            background: rgba(253, 181, 21, 0.1);
+            color: var(--accent-solar);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .section-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* CARDS GRID */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .card {
+            background: var(--secondary-dark);
+            border: 1px solid rgba(253, 181, 21, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-solar);
+        }
+        
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--accent-solar);
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .card-label {
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+        
+        /* COMPARISON */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 50px;
+        }
+        
+        .comparison-item {
+            background: var(--secondary-dark);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .comparison-item.before {
+            border: 2px solid #e74c3c;
+        }
+        
+        .comparison-item.after {
+            border: 2px solid var(--success-green);
+        }
+        
+        .comparison-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        
+        .comparison-value {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .comparison-item.before .comparison-value {
+            color: #e74c3c;
+        }
+        
+        .comparison-item.after .comparison-value {
+            color: var(--success-green);
+        }
+        
+        /* PAYBACK */
+        .payback-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .stat-box {
+            background: var(--secondary-dark);
+            border: 2px solid var(--accent-solar);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent-solar);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* TABLE */
         .table-container {
-            overflow-x: auto;
-            margin: 30px 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: var(--secondary-dark);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(253, 181, 21, 0.1);
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
         }
         
         thead {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
+            background: rgba(253, 181, 21, 0.1);
         }
         
         th {
-            padding: 18px 15px;
+            padding: 20px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
+            color: var(--accent-solar);
             text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 0.5px;
+            font-size: 12px;
+            letter-spacing: 1px;
         }
         
         td {
-            padding: 15px;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        
-        tbody tr {
-            transition: background-color 0.2s ease;
-        }
-        
-        tbody tr:nth-child(even) {
-            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         tbody tr:hover {
-            background: #e8f5e9;
+            background: rgba(253, 181, 21, 0.05);
         }
         
-        .valor-positivo {
-            color: #27ae60;
-            font-weight: 600;
+        .positive {
+            color: var(--success-green);
+            font-weight: 700;
         }
         
-        .valor-negativo {
+        .negative {
             color: #e74c3c;
-            font-weight: 600;
+            font-weight: 700;
         }
         
-        /* RODAPÉ */
+        /* BENEFITS */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 50px;
+        }
+        
+        .benefit-item {
+            background: var(--secondary-dark);
+            border-left: 4px solid var(--accent-solar);
+            border-radius: 15px;
+            padding: 30px 25px;
+            display: flex;
+            align-items: start;
+            gap: 20px;
+        }
+        
+        .benefit-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+        
+        .benefit-text h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--accent-solar);
+        }
+        
+        .benefit-text p {
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+        
+        /* CTA SECTION */
+        .cta-section {
+            background: var(--gradient-solar);
+            padding: 80px 30px;
+            text-align: center;
+            margin: 100px 0;
+        }
+        
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+        }
+        
+        .cta-section p {
+            font-size: 18px;
+            color: rgba(10, 14, 39, 0.8);
+            margin-bottom: 40px;
+        }
+        
+        .cta-button-dark {
+            display: inline-block;
+            background: var(--primary-dark);
+            color: var(--accent-solar);
+            padding: 20px 60px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 20px;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 30px rgba(10, 14, 39, 0.4);
+        }
+        
+        .cta-button-dark:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* FOOTER */
         .footer {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 40px;
+            background: var(--secondary-dark);
+            padding: 60px 30px 30px;
+            border-top: 1px solid rgba(253, 181, 21, 0.1);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
             text-align: center;
         }
         
-        .footer p {
-            margin: 8px 0;
-            opacity: 0.9;
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--gradient-solar);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
         }
         
-        .footer strong {
-            font-size: 1.2em;
-            display: block;
-            margin-bottom: 10px;
+        .footer-info {
+            color: var(--text-gray);
+            font-size: 14px;
+            line-height: 2;
+            margin-bottom: 30px;
         }
         
-        /* BOTÃO DE IMPRESSÃO */
-        .print-button {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            z-index: 1000;
+        .footer-bottom {
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-gray);
+            font-size: 12px;
         }
         
-        .print-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
-        }
-        
-        /* RESPONSIVIDADE */
+        /* MOBILE */
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                border-radius: 10px;
-            }
-            
-            .header {
-                padding: 40px 20px;
-            }
-            
-            .header h1 {
-                font-size: 1.8em;
-            }
-            
-            .section {
-                padding: 30px 20px;
-            }
-            
-            .section h2 {
-                font-size: 1.5em;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .highlight-box {
-                padding: 25px;
-            }
-            
-            .highlight-box .value {
-                font-size: 2em;
-            }
-            
-            table {
-                font-size: 0.9em;
-            }
-            
-            th, td {
-                padding: 10px 8px;
-            }
-            
-            .print-button {
-                bottom: 15px;
-                right: 15px;
-                padding: 12px 25px;
-                font-size: 0.9em;
-            }
-        }
-        
-        /* ESTILO PARA IMPRESSÃO */
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-            
-            .container {
-                box-shadow: none;
-                border-radius: 0;
-            }
-            
-            .print-button {
+            .nav-links {
                 display: none;
             }
             
-            .section {
-                page-break-inside: avoid;
+            .hero h1 {
+                font-size: 36px;
             }
             
-            .highlight-box {
-                page-break-inside: avoid;
+            .hero-investment-value {
+                font-size: 36px;
             }
             
-            table {
-                page-break-inside: auto;
+            .section-title {
+                font-size: 32px;
             }
             
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
+            .comparison {
+                grid-template-columns: 1fr;
             }
+            
+            .cards-grid,
+            .benefits-grid,
+            .payback-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* SCROLL ANIMATIONS */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- CABEÇALHO -->
-        <div class="header">
-            <h1>{{ cliente.nome }}</h1>
-            <p>Proposta de Sistema de Energia Solar</p>
-            <div class="proposta-numero">PROPOSTA {{ numero_proposta }}</div>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">⚡ LEVESOL</div>
+            <ul class="nav-links">
+                <li><a href="#resumo">Resumo</a></li>
+                <li><a href="#economia">Economia</a></li>
+                <li><a href="#sistema">Sistema</a></li>
+                <li><a href="#retorno">Retorno</a></li>
+                <li><a href="#garantias">Garantias</a></li>
+                <li><a href="#aceitar">Aceitar Proposta</a></li>
+            </ul>
         </div>
-        
-        <!-- DADOS DO CLIENTE -->
-        <div class="section">
-            <h2 data-icon="📋">Dados do Cliente</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>CPF/CNPJ</label>
-                    <span>{{ cliente.cpf_cnpj }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Endereço</label>
-                    <span>{{ cliente.endereco }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Cidade</label>
-                    <span>{{ cliente.cidade }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Telefone</label>
-                    <span>{{ cliente.telefone }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- INVESTIMENTO -->
-        <div class="section">
-            <div class="highlight-box">
-                <h3>💰 Investimento Total Proposto</h3>
-                <div class="value">R$ {{ "%.2f"|format(dados_sistema.investimento)|replace('.', ',') }}</div>
-                <p>*Valor inicial, sujeito a alterações após visita técnica.</p>
-            </div>
-        </div>
-        
-        <!-- PERFIL DE CONSUMO -->
-        <div class="section">
-            <h2 data-icon="⚡">Perfil de Consumo Atual</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Concessionária</label>
-                    <span>CPFL</span>
-                </div>
-                <div class="info-item">
-                    <label>Tipo de Fornecimento</label>
-                    <span>{{ dados_sistema.tipo_fornecimento or 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <label>Consumo Médio Mensal</label>
-                    <span>{{ dados_sistema.consumo_atual|int }} kWh</span>
-                </div>
-                <div class="info-item">
-                    <label>Valor Médio da Conta</label>
-                    <span>R$ {{ "%.2f"|format(dados_sistema.conta_antes)|replace('.', ',') }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- SISTEMA PROPOSTO -->
-        <div class="section">
-            <h2 data-icon="☀️">Sistema Fotovoltaico Proposto</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Número de Módulos</label>
-                    <span>{{ dados_sistema.num_modulos|int }} unidades</span>
-                </div>
-                <div class="info-item">
-                    <label>Potência Total do Sistema</label>
-                    <span>{{ dados_sistema.potencia_kwp }} kWp</span>
-                </div>
-                <div class="info-item">
-                    <label>Área Necessária</label>
-                    <span>{{ dados_sistema.area_total|int }} m²</span>
-                </div>
-                <div class="info-item">
-                    <label>Geração Média Mensal</label>
-                    <span>{{ dados_sistema.geracao_mensal|int }} kWh</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- RETORNO DO INVESTIMENTO -->
-        <div class="section">
-            <h2 data-icon="📈">Retorno do Investimento</h2>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="resumo">
+        <div class="hero-content">
+            <div class="hero-badge">Proposta {{ numero_proposta }}</div>
+            <h1>
+                Olá, <span class="hero-name">{{ cliente.nome }}</span>
+            </h1>
+            <p class="hero-subtitle">
+                Sua proposta personalizada de energia solar está pronta. 
+                Economize até R$ {{ "%.0f"|format(economia_total) }} em 21 anos!
+            </p>
             
-            <div class="highlight-box warning">
-                <h3>⏱️ Tempo Estimado de Retorno (Payback)</h3>
-                <div class="value">{{ payback_anos }} anos e {{ payback_meses }} meses</div>
+            <div class="hero-investment">
+                <div class="hero-investment-label">Investimento Total</div>
+                <div class="hero-investment-value">
+                    R$ {{ "%.2f"|format(dados_sistema.investimento)|replace('.', ',') }}
+                </div>
+                <div class="hero-investment-note">*Valor sujeito a alterações após visita técnica</div>
             </div>
             
-            <div class="highlight-box">
-                <h3>💵 Economia Total Projetada (21 anos)</h3>
-                <div class="value">R$ {{ "%.2f"|format(economia_total)|replace('.', ',') }}</div>
-                <p>Valor acumulado considerando reajuste médio anual de 5% na tarifa de energia.</p>
-            </div>
+            <a href="#aceitar" class="cta-button">🚀 Aceitar Proposta</a>
         </div>
-        
-        <!-- TABELA DE PROJEÇÃO -->
-        <div class="section">
-            <h2 data-icon="📊">Projeção de Caixa Acumulado</h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Ano</th>
-                            <th>Economia Mensal</th>
-                            <th>Saldo Acumulado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in dados_payback[:21] %}
-                        <tr>
-                            <td><strong>{{ item.ano }}</strong></td>
-                            <td>R$ {{ "%.2f"|format(item.economia_mensal)|replace('.', ',') }}</td>
-                            <td class="{% if item.amortizacao < 0 %}valor-negativo{% else %}valor-positivo{% endif %}">
-                                R$ {{ "%.2f"|format(item.amortizacao)|replace('.', ',') }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <p style="margin-top: 20px; color: #7f8c8d; font-size: 0.95em; text-align: center;">
-                *Cálculos baseados em reajuste anual médio de 5% na tarifa de energia.
+    </section>
+
+    <!-- ECONOMIA -->
+    <section class="section" id="economia">
+        <div class="section-header fade-in">
+            <div class="section-badge">💰 Economia Garantida</div>
+            <h2 class="section-title">Veja Quanto Você Vai Economizar</h2>
+            <p class="section-subtitle">
+                Compare sua conta de energia antes e depois do sistema solar
             </p>
         </div>
         
-        <!-- EQUIPAMENTOS E GARANTIAS -->
-        <div class="section">
-            <h2 data-icon="🔧">Equipamentos e Serviços Inclusos</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Módulos Fotovoltaicos</label>
-                    <span>{{ dados_sistema.num_modulos|int }}x RISEN / HONOR / SUNX 700W</span>
+        <div class="comparison">
+            <div class="comparison-item before">
+                <div class="comparison-label">❌ Antes</div>
+                <div class="comparison-value">
+                    R$ {{ "%.2f"|format(dados_sistema.conta_antes)|replace('.', ',') }}
                 </div>
-                <div class="info-item">
-                    <label>Inversor Solar</label>
-                    <span>1x DEYE / GROWATT / SOLIS {{ dados_sistema.potencia_inversor }}kW</span>
-                </div>
-                <div class="info-item">
-                    <label>Estrutura de Montagem</label>
-                    <span>Completa para instalação</span>
-                </div>
-                <div class="info-item">
-                    <label>Serviços Inclusos</label>
-                    <span>Proteção, Cabeamento, Instalação, Homologação, Monitoramento e Frete</span>
-                </div>
+                <div class="card-label">Valor médio mensal</div>
             </div>
             
-            <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 12px; border-left: 4px solid #27ae60;">
-                <h3 style="color: #27ae60; margin-bottom: 15px; font-size: 1.3em;">✅ Garantias</h3>
-                <p style="margin: 10px 0;"><strong>Inversores:</strong> 10 anos contra defeitos de fabricação</p>
-                <p style="margin: 10px 0;"><strong>Módulos:</strong> 12 anos (produto) e 30 anos (eficiência de geração)</p>
-                <p style="margin: 10px 0;"><strong>Instalação:</strong> 1 ano de garantia completa</p>
+            <div class="comparison-item after">
+                <div class="comparison-label">✅ Depois</div>
+                <div class="comparison-value">
+                    R$ {{ "%.2f"|format(dados_sistema.get('conta_depois', 150))|replace('.', ',') }}
+                </div>
+                <div class="card-label">Valor médio mensal</div>
             </div>
         </div>
-        
-        <!-- PRAZOS -->
-        <div class="section">
-            <h2 data-icon="📅">Prazos e Condições</h2>
-            <div style="padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; margin-bottom: 20px;">
-                <p style="color: #856404; font-weight: 600; font-size: 1.1em;">
-                    ⚠️ PROPOSTA VÁLIDA POR 10 DIAS OU ENQUANTO DURAREM OS ESTOQUES
-                </p>
-            </div>
-            
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Entrega dos Equipamentos</label>
-                    <span>30 a 60 dias após pagamento</span>
-                </div>
-                <div class="info-item">
-                    <label>Instalação</label>
-                    <span>7 a 15 dias após entrega</span>
-                </div>
-                <div class="info-item">
-                    <label>Início de Funcionamento</label>
-                    <span>30 a 60 dias (depende da concessionária)</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- RODAPÉ -->
-        <div class="footer">
-            <strong>LEVESOL LTDA</strong>
-            <p>CNPJ 44.075.186/0001-11</p>
-            <p>Avenida Nossa Senhora de Fátima, 11-15, Jardim América</p>
-            <p>CEP 17017-337, Bauru - SP</p>
-            <p style="margin-top: 15px;">
-                📞 (14) 99893-7738 | 
-                ✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="32515d5c4653465d725e574457415d5e1c515d5f1c5040">[email&#160;protected]</a> | 
-                🌐 www.levesol.com.br
+    </section>
+
+    <!-- SISTEMA -->
+    <section class="section" id="sistema">
+        <div class="section-header">
+            <div class="section-badge">⚡ Sistema Proposto</div>
+            <h2 class="section-title">Seu Sistema Fotovoltaico</h2>
+            <p class="section-subtitle">
+                Equipamentos de alta qualidade com garantia estendida
             </p>
         </div>
-    </div>
-    
-    <!-- BOTÃO DE IMPRESSÃO -->
-    <button class="print-button" onclick="window.print()">🖨️ Imprimir Proposta</button>
-    
-    <!-- SCRIPT DE TRACKING -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Registra tempo de permanência na página
-        let tempoInicio = Date.now();
         
-        // Envia tracking após 5 segundos de visualização
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">🔆</div>
+                <div class="card-title">Módulos Solares</div>
+                <div class="card-value">{{ dados_sistema.num_modulos|int }}</div>
+                <div class="card-label">unidades de 700W</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">⚙️</div>
+                <div class="card-title">Potência Total</div>
+                <div class="card-value">{{ dados_sistema.potencia_kwp }}</div>
+                <div class="card-label">kWp instalados</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">📐</div>
+                <div class="card-title">Área Necessária</div>
+                <div class="card-value">{{ dados_sistema.area_total|int }}</div>
+                <div class="card-label">metros quadrados</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">🔋</div>
+                <div class="card-title">Geração Mensal</div>
+                <div class="card-value">{{ dados_sistema.geracao_mensal|int }}</div>
+                <div class="card-label">kWh por mês</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RETORNO -->
+    <section class="section" id="retorno">
+        <div class="section-header">
+            <div class="section-badge">📈 Retorno do Investimento</div>
+            <h2 class="section-title">Payback Garantido</h2>
+            <p class="section-subtitle">
+                Seu investimento se paga sozinho em poucos anos
+            </p>
+        </div>
+        
+        <div class="payback-stats">
+            <div class="stat-box">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-value">{{ payback_anos }} anos</div>
+                <div class="stat-label">Tempo de retorno</div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-icon">💵</div>
+                <div class="stat-value">R$ {{ "%.0f"|format(economia_total)|replace('.', ',') }}</div>
+                <div class="stat-label">Economia em 21 anos</div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-icon">🌱</div>
+                <div class="stat-value">30 anos</div>
+                <div class="stat-label">Vida útil dos módulos</div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ano</th>
+                        <th>Economia Mensal</th>
+                        <th>Saldo Acumulado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in dados_payback[:10] %}
+                    <tr>
+                        <td><strong>Ano {{ item.ano }}</strong></td>
+                        <td>R$ {{ "%.2f"|format(item.economia_mensal)|replace('.', ',') }}</td>
+                        <td class="{% if item.amortizacao < 0 %}negative{% else %}positive{% endif %}">
+                            R$ {{ "%.2f"|format(item.amortizacao)|replace('.', ',') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- GARANTIAS -->
+    <section class="section" id="garantias">
+        <div class="section-header">
+            <div class="section-badge">✅ Garantias</div>
+            <h2 class="section-title">Proteção Total do Seu Investimento</h2>
+            <p class="section-subtitle">
+                Trabalhamos apenas com as melhores marcas do mercado
+            </p>
+        </div>
+        
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="benefit-icon">🔆</div>
+                <div class="benefit-text">
+                    <h4>Módulos Premium</h4>
+                    <p>12 anos de garantia do produto + 30 anos de eficiência de geração</p>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">⚙️</div>
+                <div class="benefit-text">
+                    <h4>Inversor de Qualidade</h4>
+                    <p>10 anos de garantia contra defeitos de fabricação</p>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">🔧</div>
+                <div class="benefit-text">
+                    <h4>Instalação Profissional</h4>
+                    <p>1 ano de garantia completa da instalação</p>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">📱</div>
+                <div class="benefit-text">
+                    <h4>Monitoramento</h4>
+                    <p>Acompanhe sua geração em tempo real pelo celular</p>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">🚚</div>
+                <div class="benefit-text">
+                    <h4>Frete Incluso</h4>
+                    <p>Entrega dos equipamentos sem custo adicional</p>
+                </div>
+            </div>
+            
+            <div class="benefit-item">
+                <div class="benefit-icon">📋</div>
+                <div class="benefit-text">
+                    <h4>Homologação</h4>
+                    <p>Cuidamos de toda burocracia com a concessionária</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-section" id="aceitar">
+        <h2>Pronto para Economizar?</h2>
+        <p>Entre em contato agora e garanta sua proposta por 10 dias!</p>
+        <a href="https://wa.me/5514998937738?text=Olá! Gostaria de aceitar a proposta {{ numero_proposta }}" 
+           class="cta-button-dark" target="_blank">
+            💬 Aceitar via WhatsApp
+        </a>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">LEVESOL</div>
+            <div class="footer-info">
+                <p><strong>LEVESOL LTDA</strong> - CNPJ 44.075.186/0001-11</p>
+                <p>Avenida Nossa Senhora de Fátima, 11-15, Jardim América</p>
+                <p>CEP 17017-337, Bauru - SP</p>
+                <p>📞 (14) 99893-7738 | ✉️ contato@levesol.com.br</p>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 LEVESOL - Energia Solar | Proposta válida por 10 dias</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- TRACKING SCRIPT -->
+    <script>
+        let startTime = Date.now();
+        
+        // Tracking de permanência
         setTimeout(() => {
             fetch('/api/proposta/{{ proposta_id }}/track-engagement', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tempo_permanencia: Math.floor((Date.now() - tempoInicio) / 1000)
+                    tempo_permanencia: Math.floor((Date.now() - startTime) / 1000)
                 })
-            }).catch(() => {}); // Silenciosamente ignora erros
+            }).catch(() => {});
         }, 5000);
         
-        // Tracking de saída da página
+        // Tracking de saída
         window.addEventListener('beforeunload', () => {
             navigator.sendBeacon(
-                '
+                '/api/proposta/{{ proposta_id }}/track-exit',
+                JSON.stringify({
+                    tempo_total: Math.floor((Date.now() - startTime) / 1000)
+                })
+            );
+        });
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
