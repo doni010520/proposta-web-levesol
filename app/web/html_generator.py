@@ -1,162 +1,136 @@
-from jinja2 import Environment, FileSystemLoader
 import os
-from typing import Dict, List, Any, Tuple
+from datetime import datetime
+from jinja2 import Environment, FileSystemLoader
+import re
 
 class HTMLGenerator:
     def __init__(self):
-        """Inicializa o gerador de HTML com templates Jinja2"""
-        template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-        self.env = Environment(loader=FileSystemLoader(template_dir))
-        self.template = self.env.get_template('proposta_template.html')
-    
-    def _clean_currency(self, value_str) -> float:
-        """
-        Converte uma string de moeda para float de forma segura.
-        Mesma lógica do gerador de PDF original.
-        """
-        if value_str is None:
+        # Define onde estão os templates
+        # Ajuste o caminho conforme necessário dependendo de onde roda o main.py
+        self.template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+        self.env = Environment(loader=FileSystemLoader(self.template_dir))
+
+    def _clean_currency(self, value_str):
+        """Converte string de moeda (R$ 1.200,00) para float (1200.00)"""
+        if not value_str:
             return 0.0
         try:
-            s = str(value_str).replace("R$", "").strip()
-            s = s.replace(" ", "")
-            
+            # Remove R$ e espaços
+            s = str(value_str).replace("R$", "").strip().replace(" ", "")
+            # Se tiver vírgula e ponto, assume formato brasileiro (1.000,00)
             if ',' in s and '.' in s:
-                pos_virgula = s.rfind(',')
-                pos_ponto = s.rfind('.')
-                
-                if pos_ponto > pos_virgula:
-                    s = s.replace(',', '')
-                else:
-                    s = s.replace('.', '').replace(',', '.')
+                s = s.replace('.', '').replace(',', '.')
             elif ',' in s:
-                partes = s.split(',')
-                if len(partes[-1]) == 2:
-                    s = s.replace(',', '.')
-                else:
-                    s = s.replace(',', '')
-            
+                s = s.replace(',', '.')
             return float(s)
-        except (ValueError, TypeError) as e:
-            print(f"Erro ao converter '{value_str}': {e}")
+        except (ValueError, TypeError):
             return 0.0
-    
-    def extrair_dados(self, dados_completos: List[Dict[str, Any]]) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
-        """
-        Extrai dados do sistema e payback do JSON unificado.
-        Mesma lógica do gerador de PDF original.
-        """
+
+    def _extract_data(self, dados_completos):
+        """Extrai e limpa os dados do JSON bruto da planilha"""
         dados_sistema = {}
         dados_payback = []
-        
+
         for item in dados_completos:
-            # Extrair dados do gráfico de payback
+            # Extrair dados da Tabela de Payback
             if "Gráfico Payback" in item and item.get("col_2"):
                 try:
-                    valor = self._clean_currency(item["col_2"])
-                    economia = self._clean_currency(item["col_3"])
                     ano = int(item["Gráfico Payback"])
+                    saldo = self._clean_currency(item["col_2"])
+                    economia = self._clean_currency(item["col_3"])
                     dados_payback.append({
-                        "ano": ano, 
-                        "amortizacao": valor, 
+                        "ano": ano,
+                        "amortizacao": saldo,
                         "economia_mensal": economia
                     })
-                except (ValueError, TypeError):
+                except:
                     continue
-            
-            # Extrair dados da conta de energia
+
+            # Extrair dados gerais do Sistema e Conta
             if "DADOS DA CONTA DE ENERGIA" in item:
                 campo = item["DADOS DA CONTA DE ENERGIA"]
                 valor = item.get("col_7")
                 
-                key_map = {
+                # Mapeamento dos campos da planilha para nossas variáveis
+                mapa = {
                     "Consumo Total Permitido (mês) kwh:": "consumo_atual",
                     "Quantidade de módulos": "num_modulos",
                     "Potência do sistema": "potencia_kwp",
                     "Potência do inversor": "potencia_inversor",
                     "Área total instalada": "area_total",
                     "Energia Média Gerada (mês)": "geracao_mensal",
-                    "Energia Média Gerada (ano)": "geracao_anual",
                     "Valor da conta antes": "conta_antes",
-                    "Valor da conta depois": "conta_depois",
                     "Preço do Sistema": "investimento",
                     "Padrão do Cliente": "tipo_fornecimento"
                 }
                 
-                for key, mapped_key in key_map.items():
-                    if key in campo:
-                        dados_sistema[mapped_key] = valor
-                        break
-        
-        # Converter valores numéricos
+                for chave_planilha, chave_sistema in mapa.items():
+                    if chave_planilha in campo:
+                        dados_sistema[chave_sistema] = valor
+
+        # Limpar números do sistema (converter para float/int)
         for key in ['num_modulos', 'investimento', 'conta_antes', 'area_total', 'geracao_mensal', 'consumo_atual']:
-            if key in dados_sistema and dados_sistema[key] is not None:
-                try:
-                    dados_sistema[key] = self._clean_currency(dados_sistema[key])
-                except (ValueError, TypeError):
-                    dados_sistema[key] = 0
-            else:
-                dados_sistema[key] = 0
+            if key in dados_sistema:
+                dados_sistema[key] = self._clean_currency(dados_sistema[key])
         
+        # Tratamento especial para inteiros
+        if 'num_modulos' in dados_sistema:
+            dados_sistema['num_modulos'] = int(dados_sistema['num_modulos'])
+
         return dados_sistema, dados_payback
-    
-    def calcular_payback(self, dados_payback: List[Dict[str, Any]]) -> Tuple[int, int]:
-        """
-        Calcula o período de payback em anos e meses.
-        Mesma lógica do gerador de PDF original.
-        """
+
+    def _calcular_payback_tempo(self, dados_payback):
+        """Calcula anos e meses para o retorno do investimento"""
         for i, item in enumerate(dados_payback):
-            if item["amortizacao"] > 0 and i > 0:
-                valor_anterior = dados_payback[i-1]["amortizacao"]
-                if valor_anterior < 0:
-                    diferenca_anual = item["amortizacao"] - valor_anterior
+            saldo = item["amortizacao"]
+            if saldo > 0 and i > 0:
+                saldo_anterior = dados_payback[i-1]["amortizacao"]
+                if saldo_anterior < 0:
+                    diferenca_anual = saldo - saldo_anterior
                     if diferenca_anual > 0:
-                        meses_para_zerar = (abs(valor_anterior) / (diferenca_anual / 12))
-                        anos = i - 1
-                        meses = int(meses_para_zerar)
-                        if meses >= 12:
-                            anos += meses // 12
-                            meses %= 12
+                        fracao_ano = abs(saldo_anterior) / diferenca_anual
+                        meses_totais = int(fracao_ano * 12)
+                        anos = (i - 1) + (meses_totais // 12)
+                        meses = meses_totais % 12
                         return anos, meses
         return 0, 0
-    
-    def gerar_proposta_html(
-        self, 
-        proposta_id: str,
-        numero_proposta: str,
-        cliente: Dict[str, str],
-        dados_completos: List[Dict[str, Any]]
-    ) -> str:
-        """
-        Gera HTML completo da proposta
+
+    def render_proposal(self, json_entrada):
+        """Método principal chamado pela API"""
         
-        Args:
-            proposta_id: UUID da proposta
-            numero_proposta: Número formatado da proposta
-            cliente: Dados do cliente
-            dados_completos: Array com todos os dados da planilha
-            
-        Returns:
-            str: HTML renderizado
-        """
-        # Extrair dados do sistema e payback
-        dados_sistema, dados_payback = self.extrair_dados(dados_completos)
+        # 1. Processar dados
+        dados_sistema, dados_payback = self._extract_data(json_entrada["dados_completos"])
+        anos, meses = self._calcular_payback_tempo(dados_payback)
         
-        # Calcular payback
-        payback_anos, payback_meses = self.calcular_payback(dados_payback)
-        
-        # Economia total (último valor do payback)
+        # Calcular economia total (último ano da tabela)
         economia_total = dados_payback[-1]["amortizacao"] if dados_payback else 0
-        
-        # Renderizar template
-        html_content = self.template.render(
-            proposta_id=proposta_id,
-            numero_proposta=numero_proposta,
-            cliente=cliente,
-            dados_sistema=dados_sistema,
-            dados_payback=dados_payback,
-            payback_anos=payback_anos,
-            payback_meses=payback_meses,
-            economia_total=economia_total
-        )
-        
-        return html_content
+
+        # 2. Preparar dados para o Chart.js
+        chart_labels = [f"Ano {d['ano']}" for d in dados_payback]
+        chart_values = [d['amortizacao'] for d in dados_payback]
+
+        # 3. Limpar telefone para link do WhatsApp (apenas números)
+        telefone_raw = json_entrada["cliente"].get("telefone", "")
+        telefone_limpo = re.sub(r'\D', '', str(telefone_raw))
+        if not telefone_limpo.startswith('55'):
+            telefone_limpo = '55' + telefone_limpo
+
+        # 4. Criar contexto para o Template
+        contexto = {
+            "numero_proposta": f"{datetime.now().strftime('%d%m%y')}/{datetime.now().year}",
+            "cliente": {
+                **json_entrada["cliente"],
+                "telefone_limpo": telefone_limpo
+            },
+            "dados_sistema": dados_sistema,
+            "dados_payback": dados_payback,
+            "payback_anos": anos,
+            "payback_meses": meses,
+            "economia_total": economia_total,
+            "chart_labels": chart_labels,
+            "chart_values": chart_values
+        }
+
+        # 5. Renderizar HTML
+        template = self.env.get_template('proposta_template.html')
+        return template.render(contexto)
