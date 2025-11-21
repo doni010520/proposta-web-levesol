@@ -1,0 +1,192 @@
+{
+  "name": "Proposta Web - LEVESOL",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "criar-proposta",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook - Recebe Dados",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://seu-servidor:8182/api/proposta",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"cliente\": {\n    \"nome\": \"{{ $json.body.nome }}\",\n    \"cpf_cnpj\": \"{{ $json.body.cpf }}\",\n    \"endereco\": \"{{ $json.body.endereco }}\",\n    \"cidade\": \"{{ $json.body.cidade }}\",\n    \"telefone\": \"{{ $json.body.telefone }}\"\n  },\n  \"dados_completos\": {{ $json.body.dados_completos }}\n}"
+      },
+      "name": "HTTP - Criar Proposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "content": "=🎉 *Proposta Gerada com Sucesso!*\n\nOlá {{ $('Webhook - Recebe Dados').item.json.body.nome }},\n\nSua proposta de energia solar está pronta!\n\n📄 *Proposta:* {{ $json.numero_proposta }}\n💰 *Investimento:* R$ 50.000,00\n\n👉 *Clique aqui para visualizar:*\n{{ $json.proposta_url }}\n\nQualquer dúvida, estamos à disposição!\n\nEquipe LEVESOL ⚡",
+        "additionalFields": {}
+      },
+      "name": "WhatsApp - Enviar Link",
+      "type": "n8n-nodes-base.whatsapp",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "unit": "hours",
+        "amount": 2
+      },
+      "name": "Aguardar 2 horas",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "=http://seu-servidor:8182/api/proposta/{{ $('HTTP - Criar Proposta').item.json.proposta_id }}/stats",
+        "method": "GET",
+        "options": {}
+      },
+      "name": "HTTP - Verificar Visualizações",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.total_visualizacoes }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "IF - Cliente Visualizou?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "content": "=✅ *Notificação Interna*\n\nCliente *{{ $('Webhook - Recebe Dados').item.json.body.nome }}* visualizou a proposta!\n\n📊 *Estatísticas:*\n• Total de visualizações: {{ $('HTTP - Verificar Visualizações').item.json.total_visualizacoes }}\n• Primeira vez: {{ $('HTTP - Verificar Visualizações').item.json.primeira_visualizacao }}\n• Última vez: {{ $('HTTP - Verificar Visualizações').item.json.ultima_visualizacao }}\n\n👉 Hora de ligar e fechar negócio!"
+      },
+      "name": "WhatsApp - Notificar Equipe (SIM)",
+      "type": "n8n-nodes-base.whatsapp",
+      "typeVersion": 1,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "content": "=👋 Oi {{ $('Webhook - Recebe Dados').item.json.body.nome }}!\n\nVi que você recebeu a proposta de energia solar há algumas horas.\n\nJá conseguiu dar uma olhada? 👀\n\n📄 Link da proposta:\n{{ $('HTTP - Criar Proposta').item.json.proposta_url }}\n\nSe tiver qualquer dúvida, é só chamar! 😊\n\nEquipe LEVESOL ⚡"
+      },
+      "name": "WhatsApp - Lembrete Cliente (NÃO)",
+      "type": "n8n-nodes-base.whatsapp",
+      "typeVersion": 1,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('HTTP - Criar Proposta').item.json }}"
+      },
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 500]
+    }
+  ],
+  "connections": {
+    "Webhook - Recebe Dados": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Criar Proposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Criar Proposta": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp - Enviar Link",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp - Enviar Link": {
+      "main": [
+        [
+          {
+            "node": "Aguardar 2 horas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar 2 horas": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Verificar Visualizações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Verificar Visualizações": {
+      "main": [
+        [
+          {
+            "node": "IF - Cliente Visualizou?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Cliente Visualizou?": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp - Notificar Equipe (SIM)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WhatsApp - Lembrete Cliente (NÃO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-11-21T00:00:00.000Z",
+  "versionId": "1"
+}

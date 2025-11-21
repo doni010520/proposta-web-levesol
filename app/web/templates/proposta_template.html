@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Proposta de Sistema de Energia Solar - LEVESOL">
+    <title>Proposta {{ numero_proposta }} - {{ cliente.nome }} | LEVESOL</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        /* CABEÇALHO */
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%23ffffff"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23ffffff"/></svg>') no-repeat bottom;
+            background-size: 100% 100px;
+            opacity: 0.1;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .header .proposta-numero {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 30px;
+            border-radius: 50px;
+            margin-top: 20px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* SEÇÕES */
+        .section {
+            padding: 50px 40px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .section:last-of-type {
+            border-bottom: none;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section h2::before {
+            content: attr(data-icon);
+            font-size: 1.2em;
+        }
+        
+        /* GRID DE INFORMAÇÕES */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .info-item {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .info-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.2);
+        }
+        
+        .info-item label {
+            font-weight: 600;
+            color: #7f8c8d;
+            font-size: 0.85em;
+            display: block;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-item span {
+            color: #2c3e50;
+            font-size: 1.15em;
+            font-weight: 500;
+            display: block;
+            word-wrap: break-word;
+        }
+        
+        /* CAIXAS DE DESTAQUE */
+        .highlight-box {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .highlight-box h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: 400;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .highlight-box .value {
+            font-size: 3em;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .highlight-box p {
+            margin-top: 15px;
+            opacity: 0.95;
+            font-size: 0.95em;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .highlight-box.warning {
+            background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.3);
+        }
+        
+        /* TABELAS */
+        .table-container {
+            overflow-x: auto;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tbody tr:hover {
+            background: #e8f5e9;
+        }
+        
+        .valor-positivo {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .valor-negativo {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        /* RODAPÉ */
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .footer p {
+            margin: 8px 0;
+            opacity: 0.9;
+        }
+        
+        .footer strong {
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        /* BOTÃO DE IMPRESSÃO */
+        .print-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
+        }
+        
+        /* RESPONSIVIDADE */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .section {
+                padding: 30px 20px;
+            }
+            
+            .section h2 {
+                font-size: 1.5em;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .highlight-box {
+                padding: 25px;
+            }
+            
+            .highlight-box .value {
+                font-size: 2em;
+            }
+            
+            table {
+                font-size: 0.9em;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            .print-button {
+                bottom: 15px;
+                right: 15px;
+                padding: 12px 25px;
+                font-size: 0.9em;
+            }
+        }
+        
+        /* ESTILO PARA IMPRESSÃO */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .print-button {
+                display: none;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .highlight-box {
+                page-break-inside: avoid;
+            }
+            
+            table {
+                page-break-inside: auto;
+            }
+            
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- CABEÇALHO -->
+        <div class="header">
+            <h1>{{ cliente.nome }}</h1>
+            <p>Proposta de Sistema de Energia Solar</p>
+            <div class="proposta-numero">PROPOSTA {{ numero_proposta }}</div>
+        </div>
+        
+        <!-- DADOS DO CLIENTE -->
+        <div class="section">
+            <h2 data-icon="📋">Dados do Cliente</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>CPF/CNPJ</label>
+                    <span>{{ cliente.cpf_cnpj }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Endereço</label>
+                    <span>{{ cliente.endereco }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Cidade</label>
+                    <span>{{ cliente.cidade }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Telefone</label>
+                    <span>{{ cliente.telefone }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- INVESTIMENTO -->
+        <div class="section">
+            <div class="highlight-box">
+                <h3>💰 Investimento Total Proposto</h3>
+                <div class="value">R$ {{ "%.2f"|format(dados_sistema.investimento)|replace('.', ',') }}</div>
+                <p>*Valor inicial, sujeito a alterações após visita técnica.</p>
+            </div>
+        </div>
+        
+        <!-- PERFIL DE CONSUMO -->
+        <div class="section">
+            <h2 data-icon="⚡">Perfil de Consumo Atual</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Concessionária</label>
+                    <span>CPFL</span>
+                </div>
+                <div class="info-item">
+                    <label>Tipo de Fornecimento</label>
+                    <span>{{ dados_sistema.tipo_fornecimento or 'N/A' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Consumo Médio Mensal</label>
+                    <span>{{ dados_sistema.consumo_atual|int }} kWh</span>
+                </div>
+                <div class="info-item">
+                    <label>Valor Médio da Conta</label>
+                    <span>R$ {{ "%.2f"|format(dados_sistema.conta_antes)|replace('.', ',') }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SISTEMA PROPOSTO -->
+        <div class="section">
+            <h2 data-icon="☀️">Sistema Fotovoltaico Proposto</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Número de Módulos</label>
+                    <span>{{ dados_sistema.num_modulos|int }} unidades</span>
+                </div>
+                <div class="info-item">
+                    <label>Potência Total do Sistema</label>
+                    <span>{{ dados_sistema.potencia_kwp }} kWp</span>
+                </div>
+                <div class="info-item">
+                    <label>Área Necessária</label>
+                    <span>{{ dados_sistema.area_total|int }} m²</span>
+                </div>
+                <div class="info-item">
+                    <label>Geração Média Mensal</label>
+                    <span>{{ dados_sistema.geracao_mensal|int }} kWh</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- RETORNO DO INVESTIMENTO -->
+        <div class="section">
+            <h2 data-icon="📈">Retorno do Investimento</h2>
+            
+            <div class="highlight-box warning">
+                <h3>⏱️ Tempo Estimado de Retorno (Payback)</h3>
+                <div class="value">{{ payback_anos }} anos e {{ payback_meses }} meses</div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3>💵 Economia Total Projetada (21 anos)</h3>
+                <div class="value">R$ {{ "%.2f"|format(economia_total)|replace('.', ',') }}</div>
+                <p>Valor acumulado considerando reajuste médio anual de 5% na tarifa de energia.</p>
+            </div>
+        </div>
+        
+        <!-- TABELA DE PROJEÇÃO -->
+        <div class="section">
+            <h2 data-icon="📊">Projeção de Caixa Acumulado</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ano</th>
+                            <th>Economia Mensal</th>
+                            <th>Saldo Acumulado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in dados_payback[:21] %}
+                        <tr>
+                            <td><strong>{{ item.ano }}</strong></td>
+                            <td>R$ {{ "%.2f"|format(item.economia_mensal)|replace('.', ',') }}</td>
+                            <td class="{% if item.amortizacao < 0 %}valor-negativo{% else %}valor-positivo{% endif %}">
+                                R$ {{ "%.2f"|format(item.amortizacao)|replace('.', ',') }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 20px; color: #7f8c8d; font-size: 0.95em; text-align: center;">
+                *Cálculos baseados em reajuste anual médio de 5% na tarifa de energia.
+            </p>
+        </div>
+        
+        <!-- EQUIPAMENTOS E GARANTIAS -->
+        <div class="section">
+            <h2 data-icon="🔧">Equipamentos e Serviços Inclusos</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Módulos Fotovoltaicos</label>
+                    <span>{{ dados_sistema.num_modulos|int }}x RISEN / HONOR / SUNX 700W</span>
+                </div>
+                <div class="info-item">
+                    <label>Inversor Solar</label>
+                    <span>1x DEYE / GROWATT / SOLIS {{ dados_sistema.potencia_inversor }}kW</span>
+                </div>
+                <div class="info-item">
+                    <label>Estrutura de Montagem</label>
+                    <span>Completa para instalação</span>
+                </div>
+                <div class="info-item">
+                    <label>Serviços Inclusos</label>
+                    <span>Proteção, Cabeamento, Instalação, Homologação, Monitoramento e Frete</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 12px; border-left: 4px solid #27ae60;">
+                <h3 style="color: #27ae60; margin-bottom: 15px; font-size: 1.3em;">✅ Garantias</h3>
+                <p style="margin: 10px 0;"><strong>Inversores:</strong> 10 anos contra defeitos de fabricação</p>
+                <p style="margin: 10px 0;"><strong>Módulos:</strong> 12 anos (produto) e 30 anos (eficiência de geração)</p>
+                <p style="margin: 10px 0;"><strong>Instalação:</strong> 1 ano de garantia completa</p>
+            </div>
+        </div>
+        
+        <!-- PRAZOS -->
+        <div class="section">
+            <h2 data-icon="📅">Prazos e Condições</h2>
+            <div style="padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; margin-bottom: 20px;">
+                <p style="color: #856404; font-weight: 600; font-size: 1.1em;">
+                    ⚠️ PROPOSTA VÁLIDA POR 10 DIAS OU ENQUANTO DURAREM OS ESTOQUES
+                </p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Entrega dos Equipamentos</label>
+                    <span>30 a 60 dias após pagamento</span>
+                </div>
+                <div class="info-item">
+                    <label>Instalação</label>
+                    <span>7 a 15 dias após entrega</span>
+                </div>
+                <div class="info-item">
+                    <label>Início de Funcionamento</label>
+                    <span>30 a 60 dias (depende da concessionária)</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- RODAPÉ -->
+        <div class="footer">
+            <strong>LEVESOL LTDA</strong>
+            <p>CNPJ 44.075.186/0001-11</p>
+            <p>Avenida Nossa Senhora de Fátima, 11-15, Jardim América</p>
+            <p>CEP 17017-337, Bauru - SP</p>
+            <p style="margin-top: 15px;">
+                📞 (14) 99893-7738 | 
+                ✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="32515d5c4653465d725e574457415d5e1c515d5f1c5040">[email&#160;protected]</a> | 
+                🌐 www.levesol.com.br
+            </p>
+        </div>
+    </div>
+    
+    <!-- BOTÃO DE IMPRESSÃO -->
+    <button class="print-button" onclick="window.print()">🖨️ Imprimir Proposta</button>
+    
+    <!-- SCRIPT DE TRACKING -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Registra tempo de permanência na página
+        let tempoInicio = Date.now();
+        
+        // Envia tracking após 5 segundos de visualização
+        setTimeout(() => {
+            fetch('/api/proposta/{{ proposta_id }}/track-engagement', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tempo_permanencia: Math.floor((Date.now() - tempoInicio) / 1000)
+                })
+            }).catch(() => {}); // Silenciosamente ignora erros
+        }, 5000);
+        
+        // Tracking de saída da página
+        window.addEventListener('beforeunload', () => {
+            navigator.sendBeacon(
+                '

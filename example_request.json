@@ -1,0 +1,126 @@
+{
+  "cliente": {
+    "nome": "João da Silva Exemplo",
+    "cpf_cnpj": "123.456.789-00",
+    "endereco": "Rua das Flores, 123, Centro, CEP: 17015-000",
+    "cidade": "Bauru - SP",
+    "telefone": "(14) 99999-9999"
+  },
+  "dados_completos": [
+    {
+      "row_number": "1",
+      "Gráfico Payback": "1",
+      "col_2": "-45000.00",
+      "col_3": "800.00"
+    },
+    {
+      "row_number": "2",
+      "Gráfico Payback": "2",
+      "col_2": "-40000.00",
+      "col_3": "840.00"
+    },
+    {
+      "row_number": "3",
+      "Gráfico Payback": "3",
+      "col_2": "-34800.00",
+      "col_3": "882.00"
+    },
+    {
+      "row_number": "4",
+      "Gráfico Payback": "4",
+      "col_2": "-29280.00",
+      "col_3": "926.10"
+    },
+    {
+      "row_number": "5",
+      "Gráfico Payback": "5",
+      "col_2": "-23394.00",
+      "col_3": "972.40"
+    },
+    {
+      "row_number": "6",
+      "Gráfico Payback": "6",
+      "col_2": "-17093.40",
+      "col_3": "1021.02"
+    },
+    {
+      "row_number": "7",
+      "Gráfico Payback": "7",
+      "col_2": "-10328.28",
+      "col_3": "1072.07"
+    },
+    {
+      "row_number": "8",
+      "Gráfico Payback": "8",
+      "col_2": "-3045.61",
+      "col_3": "1125.68"
+    },
+    {
+      "row_number": "9",
+      "Gráfico Payback": "9",
+      "col_2": "4870.07",
+      "col_3": "1181.96"
+    },
+    {
+      "row_number": "10",
+      "Gráfico Payback": "10",
+      "col_2": "13453.03",
+      "col_3": "1241.06"
+    },
+    {
+      "row_number": "23",
+      "DADOS DA CONTA DE ENERGIA": "Consumo Total Permitido (mês) kwh:",
+      "col_7": "1200"
+    },
+    {
+      "row_number": "24",
+      "DADOS DA CONTA DE ENERGIA": "Quantidade de módulos",
+      "col_7": "10"
+    },
+    {
+      "row_number": "25",
+      "DADOS DA CONTA DE ENERGIA": "Potência do sistema",
+      "col_7": "7.0"
+    },
+    {
+      "row_number": "26",
+      "DADOS DA CONTA DE ENERGIA": "Potência do inversor",
+      "col_7": "6.0"
+    },
+    {
+      "row_number": "27",
+      "DADOS DA CONTA DE ENERGIA": "Área total instalada",
+      "col_7": "25"
+    },
+    {
+      "row_number": "28",
+      "DADOS DA CONTA DE ENERGIA": "Energia Média Gerada (mês)",
+      "col_7": "1150"
+    },
+    {
+      "row_number": "29",
+      "DADOS DA CONTA DE ENERGIA": "Energia Média Gerada (ano)",
+      "col_7": "13800"
+    },
+    {
+      "row_number": "30",
+      "DADOS DA CONTA DE ENERGIA": "Valor da conta antes",
+      "col_7": "950.00"
+    },
+    {
+      "row_number": "31",
+      "DADOS DA CONTA DE ENERGIA": "Valor da conta depois",
+      "col_7": "150.00"
+    },
+    {
+      "row_number": "32",
+      "DADOS DA CONTA DE ENERGIA": "Preço do Sistema",
+      "col_7": "50000.00"
+    },
+    {
+      "row_number": "33",
+      "DADOS DA CONTA DE ENERGIA": "Padrão do Cliente",
+      "col_7": "Bifásico"
+    }
+  ]
+}
