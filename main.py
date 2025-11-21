@@ -10,12 +10,14 @@ import traceback
 load_dotenv()
 
 # Imports locais
+# Certifique-se de que app.models.schemas e app.db.database existem no seu projeto
 from app.models.schemas import (
     PropostaInput, 
     PropostaResponse, 
     EstatisticasResponse,
     VisualizacaoResponse
 )
+# Se não tiver Database mockada, comente a importação e o uso do db abaixo
 from app.db.database import Database
 from app.web.html_generator import HTMLGenerator
 
@@ -23,7 +25,7 @@ from app.web.html_generator import HTMLGenerator
 app = FastAPI(
     title="Sistema de Propostas Web - LEVESOL",
     description="API para geração e tracking de propostas de energia solar",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # Configurar CORS
@@ -36,7 +38,12 @@ app.add_middleware(
 )
 
 # Inicializar componentes
-db = Database()
+try:
+    db = Database()
+except:
+    print("Aviso: Banco de dados não inicializado (Database class not found)")
+    db = None
+
 html_generator = HTMLGenerator()
 
 # Configurações
@@ -48,10 +55,11 @@ def read_root():
     """Endpoint raiz com informações da API"""
     return {
         "message": "Sistema de Propostas Web - LEVESOL",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "endpoints": {
             "health": "GET /health",
             "criar_proposta": "POST /api/proposta",
+            "preview_proposta": "POST /api/proposta/web (Teste sem salvar)",
             "visualizar_proposta": "GET /proposta/{proposta_id}",
             "estatisticas": "GET /api/proposta/{proposta_id}/stats",
             "docs": "/docs"
@@ -68,20 +76,44 @@ def health_check():
         "service": "proposta-web-api"
     }
 
+# --- ENDPOINT NOVO: PREVIEW DIRETO (SEM BANCO) ---
+@app.post("/api/proposta/web", response_class=HTMLResponse)
+async def ver_proposta_web(dados: PropostaInput):
+    """
+    Gera a versão WEB interativa da proposta DIRETAMENTE (Sem salvar no banco).
+    Útil para testes rápidos.
+    """
+    try:
+        # Converte o modelo Pydantic para dict
+        dados_dict = {
+            "cliente": {
+                "nome": dados.cliente.nome,
+                "cpf_cnpj": dados.cliente.cpf_cnpj,
+                "endereco": dados.cliente.endereco,
+                "cidade": dados.cliente.cidade,
+                "telefone": dados.cliente.telefone
+            },
+            "dados_completos": dados.dados_completos
+        }
+        
+        # Gera o HTML usando o gerador
+        html_content = html_generator.render_proposal(dados_dict)
+        return html_content
+        
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar página web: {str(e)}")
 
+
+# --- ENDPOINT DE CRIAÇÃO (COM BANCO) ---
 @app.post("/api/proposta", response_model=PropostaResponse)
 async def criar_proposta(dados: PropostaInput):
     """
-    Cria uma nova proposta e retorna o link para visualização
-    
-    - **cliente**: Dados do cliente (nome, CPF/CNPJ, endereço, etc)
-    - **dados_completos**: Array com todos os dados da planilha
-    
-    Retorna:
-    - **proposta_id**: UUID da proposta
-    - **proposta_url**: Link para visualização (enviar ao cliente)
-    - **numero_proposta**: Número formatado da proposta
+    Cria uma nova proposta, salva no banco e retorna o link para visualização.
     """
+    if not db:
+        raise HTTPException(status_code=503, detail="Banco de dados não disponível")
+
     try:
         # Gerar número da proposta
         numero_proposta = f"{datetime.now().strftime('%d%m%y')}/{datetime.now().year}"
@@ -95,8 +127,9 @@ async def criar_proposta(dados: PropostaInput):
             "telefone": dados.cliente.telefone
         }
         
-        # Extrair dados do sistema e payback
-        dados_sistema, dados_payback = html_generator.extrair_dados(dados.dados_completos)
+        # Extrair dados limpos para salvar no banco
+        # Nota: Usando _extract_data do html_generator para garantir consistência
+        dados_sistema, dados_payback = html_generator._extract_data(dados.dados_completos)
         
         # Salvar no banco de dados
         proposta_id = db.salvar_proposta(
@@ -128,14 +161,16 @@ async def criar_proposta(dados: PropostaInput):
         )
 
 
+# --- ENDPOINT DE VISUALIZAÇÃO (RENDERIZA O HTML) ---
 @app.get("/proposta/{proposta_id}", response_class=HTMLResponse)
 async def visualizar_proposta(proposta_id: str, request: Request):
     """
-    Renderiza a proposta como página HTML
-    
-    IMPORTANTE: Este endpoint também registra automaticamente cada visualização
-    para tracking (IP, user agent, timestamp)
+    Busca a proposta no banco e renderiza o HTML via Template.
+    Registra visualização automaticamente.
     """
+    if not db:
+        raise HTTPException(status_code=503, detail="Banco de dados não disponível")
+
     try:
         # Buscar proposta no banco
         proposta = db.buscar_proposta(proposta_id)
@@ -146,7 +181,7 @@ async def visualizar_proposta(proposta_id: str, request: Request):
                 detail="Proposta não encontrada. Verifique se o ID está correto."
             )
         
-        # REGISTRAR VISUALIZAÇÃO (tracking automático)
+        # REGISTRAR VISUALIZAÇÃO (Tracking)
         client_ip = request.client.host
         user_agent = request.headers.get("user-agent", "Unknown")
         
@@ -157,10 +192,16 @@ async def visualizar_proposta(proposta_id: str, request: Request):
                 user_agent=user_agent
             )
         except Exception as e:
-            # Não falhar se o tracking der erro
             print(f"Aviso: Falha ao registrar visualização: {str(e)}")
         
-        # Preparar dados do cliente
+        # RECONSTRUÇÃO DOS DADOS
+        # O render_proposal espera o formato "raw" (como vem do JSON/Planilha)
+        # ou um dicionário estruturado. Como o render_proposal processa novamente,
+        # precisamos montar um payload que simule a entrada original ou ajustar o gerador.
+        #
+        # A estratégia aqui é reconstruir a estrutura que o render_proposal espera:
+        # { "cliente": {}, "dados_completos": [...] }
+        
         cliente_dict = {
             "nome": proposta["cliente_nome"],
             "cpf_cnpj": proposta["cliente_cpf_cnpj"],
@@ -169,19 +210,19 @@ async def visualizar_proposta(proposta_id: str, request: Request):
             "telefone": proposta["cliente_telefone"]
         }
         
-        # Reconstruir dados_completos a partir dos dados salvos
-        # (necessário para o html_generator)
-        dados_completos = []
+        # Reconstruir 'dados_completos' baseados no que foi salvo no banco
+        # Isso garante que o _extract_data dentro do render_proposal funcione
+        dados_completos_reconstruidos = []
         
-        # Adicionar dados de payback
+        # 1. Adicionar dados de payback simulando linhas da planilha
         for item in proposta["dados_payback"]:
-            dados_completos.append({
+            dados_completos_reconstruidos.append({
                 "Gráfico Payback": str(item["ano"]),
                 "col_2": str(item["amortizacao"]),
                 "col_3": str(item["economia_mensal"])
             })
         
-        # Adicionar dados do sistema
+        # 2. Adicionar dados do sistema simulando linhas da planilha
         dados_sistema = proposta["dados_sistema"]
         mapeamento_inverso = {
             "consumo_atual": "Consumo Total Permitido (mês) kwh:",
@@ -199,18 +240,19 @@ async def visualizar_proposta(proposta_id: str, request: Request):
         
         for key, label in mapeamento_inverso.items():
             if key in dados_sistema:
-                dados_completos.append({
+                dados_completos_reconstruidos.append({
                     "DADOS DA CONTA DE ENERGIA": label,
                     "col_7": str(dados_sistema[key])
                 })
         
+        # Montar payload final
+        payload = {
+            "cliente": cliente_dict,
+            "dados_completos": dados_completos_reconstruidos
+        }
+        
         # Gerar HTML
-        html_content = html_generator.gerar_proposta_html(
-            proposta_id=proposta_id,
-            numero_proposta=proposta["numero_proposta"],
-            cliente=cliente_dict,
-            dados_completos=dados_completos
-        )
+        html_content = html_generator.render_proposal(payload)
         
         return HTMLResponse(content=html_content)
         
@@ -227,24 +269,17 @@ async def visualizar_proposta(proposta_id: str, request: Request):
 
 @app.get("/api/proposta/{proposta_id}/stats", response_model=EstatisticasResponse)
 async def estatisticas_proposta(proposta_id: str):
-    """
-    Retorna estatísticas de visualizações da proposta
-    
-    - **total_visualizacoes**: Número total de vezes que foi aberta
-    - **primeira_visualizacao**: Data/hora da primeira abertura
-    - **ultima_visualizacao**: Data/hora da última abertura
-    - **historico**: Lista completa de todas as visualizações
-    """
+    """Retorna estatísticas de visualizações da proposta"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Banco de dados não disponível")
+        
     try:
-        # Verificar se proposta existe
         proposta = db.buscar_proposta(proposta_id)
         if not proposta:
             raise HTTPException(status_code=404, detail="Proposta não encontrada")
         
-        # Buscar visualizações
         visualizacoes = db.listar_visualizacoes(proposta_id)
         
-        # Preparar resposta
         visualizacoes_response = [
             VisualizacaoResponse(
                 id=v["id"],
@@ -276,28 +311,14 @@ async def estatisticas_proposta(proposta_id: str):
 
 @app.post("/api/proposta/{proposta_id}/track-engagement")
 async def track_engagement(proposta_id: str, request: Request):
-    """
-    Endpoint para tracking adicional de engajamento
-    (chamado via JavaScript após 5 segundos na página)
-    """
-    try:
-        # Pode adicionar lógica adicional aqui se necessário
-        return {"status": "tracked"}
-    except:
-        return {"status": "ignored"}
+    """Tracking adicional de engajamento (ex: tempo na página)"""
+    return {"status": "tracked"}
 
 
 @app.post("/api/proposta/{proposta_id}/track-exit")
 async def track_exit(proposta_id: str, request: Request):
-    """
-    Endpoint para tracking de saída da página
-    (chamado via JavaScript quando usuário sai)
-    """
-    try:
-        # Pode adicionar lógica adicional aqui se necessário
-        return {"status": "tracked"}
-    except:
-        return {"status": "ignored"}
+    """Tracking de saída"""
+    return {"status": "tracked"}
 
 
 if __name__ == "__main__":
@@ -308,9 +329,9 @@ if __name__ == "__main__":
     
     print(f"""
     ╔══════════════════════════════════════════════════════╗
-    ║  Sistema de Propostas Web - LEVESOL                 ║
-    ║  Rodando em: http://{host}:{port}              ║
-    ║  Documentação: http://{host}:{port}/docs       ║
+    ║  Sistema de Propostas Web - LEVESOL                  ║
+    ║  Rodando em: http://{host}:{port}                      ║
+    ║  Documentação: http://{host}:{port}/docs               ║
     ╚══════════════════════════════════════════════════════╝
     """)
     
