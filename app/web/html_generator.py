@@ -137,7 +137,6 @@ class HTMLGenerator:
             if saldo > 0:
                 # Se for o primeiro ano, o payback é em meses
                 if i == 0:
-                    # Estimativa simples: investimento / economia mensal média do ano
                     investimento_inicial = abs(dados_payback[0]["amortizacao"] - dados_payback[0]["economia_mensal"] * 12)
                     if dados_payback[0]["economia_mensal"] > 0:
                          meses_totais = int(investimento_inicial / dados_payback[0]["economia_mensal"])
@@ -151,8 +150,8 @@ class HTMLGenerator:
                     if diferenca_anual > 0:
                         fracao_ano = abs(saldo_anterior) / diferenca_anual
                         meses_extra = int(fracao_ano * 12)
-                        # CORREÇÃO: Retorna o índice (número de anos desde o início)
-                        anos = i
+                        # CORREÇÃO: Se fica positivo no índice i, já passaram i-1 anos completos
+                        anos = i - 1
                         return anos, meses_extra
         
         # Se nunca ficar positivo na série fornecida
