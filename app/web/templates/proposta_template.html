@@ -21,7 +21,7 @@
         :root {
             --bg-body-start: #0EA5E9;
             --bg-body-end: #E0F2FE;
-            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-card: rgba(255, 255, 255, 0.95); /* Mais opacidade para leitura */
             --bg-card-hover: #FFFFFF; 
             --solar-gold: #F59E0B;
             --solar-gold-hex: #f1c40f;
@@ -40,10 +40,10 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            /* Fundo com imagem remota (Unsplash) e gradiente */
+            /* NOVO BACKGROUND: Imagem diferente com referência a energia solar */
             background: 
-                linear-gradient(rgba(14, 165, 233, 0.85), rgba(224, 242, 254, 0.95)),
-                url('https://images.unsplash.com/photo-1624397640148-949b1732bb0a?q=80&w=2070&auto=format&fit=crop');
+                linear-gradient(rgba(224, 242, 254, 0.85), rgba(255, 255, 255, 0.95)),
+                url('https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2072&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -97,9 +97,18 @@
             position: relative;
         }
 
+        /* Estilo específico para a Logo Grande na Hero */
+        .hero-logo {
+            max-width: 320px;
+            width: 70%;
+            height: auto;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 10px 20px rgba(14, 165, 233, 0.2));
+        }
+
         .hero h1 { font-size: 56px; margin-bottom: 10px; color: #2c3e50; }
         .hero-sub { color: var(--solar-orange); font-size: 18px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 40px; font-weight: 800; }
-        .proposal-id { background: #fff; color: var(--text-muted); padding: 8px 20px; border-radius: 20px; font-size: 14px; margin-bottom: 20px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); font-weight: 600; }
+        .proposal-id { background: #fff; color: var(--text-muted); padding: 8px 20px; border-radius: 20px; font-size: 14px; margin-bottom: 40px; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); font-weight: 600; }
 
         /* DADOS */
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
@@ -184,8 +193,8 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <!-- IMPORTANTE: Substitua 'SEU_USUARIO/SEU_REPO' pelo caminho real do seu GitHub -->
-        <!-- Exemplo: https://raw.githubusercontent.com/levesol/assets/main/levesol_logo.png -->
+        <!-- Logo Pequena (Barra Superior) -->
+        <!-- ATENÇÃO: Substitua SEU_USUARIO/SEU_REPO pelo seu usuário e repositório do GitHub -->
         <img src="https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/app/assets/levesol_logo.png" 
              alt="LEVESOL" class="logo-img" 
              onerror="this.style.display='none'; document.getElementById('logo-text').style.display='block'">
@@ -203,6 +212,12 @@
     <!-- HERO -->
     <section class="hero">
         <div class="proposal-id">PROPOSTA {{ numero_proposta }}</div>
+        
+        <!-- LOGO GRANDE NA HERO (Nova Inserção) -->
+        <!-- ATENÇÃO: Substitua SEU_USUARIO/SEU_REPO pelo seu usuário e repositório do GitHub -->
+        <img src="https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/app/assets/levesol_logo.png" 
+             alt="LEVESOL" class="hero-logo">
+
         <h1>{{ cliente.nome }}</h1>
         <div class="hero-sub">Energia Solar Fotovoltaica</div>
         <p style="color: var(--text-muted); font-weight: 500;">Transforme sol em economia e patrimônio.</p>
@@ -409,6 +424,7 @@
         
         <div style="margin-top: 60px; border-top: 1px solid #E2E8F0; padding-top: 30px;">
             <!-- Logo Footer também via GitHub -->
+            <!-- ATENÇÃO: Substitua SEU_USUARIO/SEU_REPO pelo seu usuário e repositório do GitHub -->
             <img src="https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/app/assets/levesol_logo.png" 
                  alt="LEVESOL" style="height: 40px; width: auto; opacity: 0.9; margin-bottom: 10px;">
             <p style="font-size: 12px; color: var(--text-muted);">
@@ -427,11 +443,16 @@
         const COLOR_GOLD = '#f1c40f';
         const COLOR_TEXT = '#34495e';
 
-        // DADOS FRICTÍCIOS PARA PREVIEW (COMENTE PARA PRODUÇÃO)
-        const labels = ['Ano 1', 'Ano 2', 'Ano 3', 'Ano 4', 'Ano 5', 'Ano 6', 'Ano 7', 'Ano 8'];
-        const dataValues = [-14000, -5000, 4000, 15000, 28000, 42000, 58000, 75000];
+        // CONFIGURAÇÃO PARA EVITAR ERROS NO PREVIEW
+        // Se estiver a rodar sem backend (preview), usamos dados fictícios.
+        // Se estiver com backend, descomente as linhas abaixo e comente os dados fictícios.
 
-        // DADOS REAIS (DESCOMENTE PARA PYTHON/JINJA2)
+        // --- MODO PREVIEW (Sem backend Python) ---
+        const labels = ['Ano 1', 'Ano 2', 'Ano 3', 'Ano 4', 'Ano 5', 'Ano 6', 'Ano 7', 'Ano 8', 'Ano 9', 'Ano 10'];
+        const dataValues = [-14000, -5000, 4000, 15000, 28000, 42000, 58000, 75000, 90000, 110000];
+
+        // --- MODO PRODUÇÃO (Com backend Python) ---
+        // Descomente estas linhas quando fizer deploy no servidor
         // const labels = {{ chart_labels | tojson }};
         // const dataValues = {{ chart_values | tojson }};
 
