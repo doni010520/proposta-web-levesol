@@ -276,7 +276,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">Consumo Médio</span>
-                    <span class="info-val">{{ dados_sistema.consumo_atual | format_currency }} kWh</span>
+                    <span class="info-val">{{ dados_sistema.consumo_atual | format_number }} kWh</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Valor Médio Conta</span>
@@ -290,15 +290,15 @@
                 <span>Módulos (un)</span>
             </div>
             <div class="sys-item">
-                <h4>{{ dados_sistema.potencia_kwp | format_currency }} kWp</h4>
+                <h4>{{ dados_sistema.potencia_kwp | format_number }} kWp</h4>
                 <span>Potência Total</span>
             </div>
             <div class="sys-item">
-                <h4>{{ dados_sistema.area_total | format_currency }} m²</h4>
+                <h4>{{ dados_sistema.area_total | format_number }} m²</h4>
                 <span>Área Necessária</span>
             </div>
             <div class="sys-item">
-                <h4>{{ dados_sistema.geracao_mensal | format_currency }} kWh</h4>
+                <h4>{{ dados_sistema.geracao_mensal | format_number }} kWh</h4>
                 <span>Geração Mensal</span>
             </div>
         </div>
