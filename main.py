@@ -117,8 +117,8 @@ async def criar_proposta(dados: PropostaInput):
         raise HTTPException(status_code=503, detail="Banco de dados não disponível")
 
     try:
-        # Gerar número da proposta
-        numero_proposta = f"{datetime.now().strftime('%d%m%y')}/{datetime.now().year}"
+        # Gerar número da proposta único (adiciona hora:minuto)
+        numero_proposta = f"{datetime.now().strftime('%d%m%y-%H%M')}/{datetime.now().year}"
         
         # Preparar dados do cliente
         cliente_dict = {
