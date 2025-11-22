@@ -75,16 +75,21 @@ class HTMLGenerator:
             # Extrair dados da Tabela de Payback
             if "Gráfico Payback" in item and item.get("col_2"):
                 try:
-                    ano_relativo = int(item["Gráfico Payback"])
+                    valor_ano = int(item["Gráfico Payback"])
                     saldo = self._clean_currency(item["col_2"])
                     economia = self._clean_currency(item["col_3"])
                     
-                    # Calcula o ano real (Ano 1 = Ano Atual)
-                    ano_real = ano_atual + ano_relativo - 1
+                    # Detecta se é ano real (>= 2000) ou ano relativo (1, 2, 3...)
+                    if valor_ano >= 2000:
+                        ano_real = valor_ano
+                        ano_relativo = valor_ano - ano_atual + 1
+                    else:
+                        ano_relativo = valor_ano
+                        ano_real = ano_atual + ano_relativo - 1
                     
                     dados_payback.append({
-                        "ano": ano_relativo, # Mantém o relativo para cálculos
-                        "ano_real": ano_real, # Ano real para exibição
+                        "ano": ano_relativo,
+                        "ano_real": ano_real,
                         "amortizacao": saldo,
                         "economia_mensal": economia
                     })
@@ -146,7 +151,8 @@ class HTMLGenerator:
                     if diferenca_anual > 0:
                         fracao_ano = abs(saldo_anterior) / diferenca_anual
                         meses_extra = int(fracao_ano * 12)
-                        anos = item["ano"] - 1
+                        # CORREÇÃO: Retorna o índice (número de anos desde o início)
+                        anos = i
                         return anos, meses_extra
         
         # Se nunca ficar positivo na série fornecida
