@@ -13,7 +13,8 @@ load_dotenv()
 # Imports locais
 from app.models.schemas import (
     PropostaInput, 
-    PropostaResponse, 
+    PropostaResponse,
+    PropostaResponseComplete,
     EstatisticasResponse,
     VisualizacaoResponse
 )
@@ -107,7 +108,7 @@ async def ver_proposta_web(dados: PropostaInput):
         raise HTTPException(status_code=500, detail=f"Erro ao gerar página web: {str(e)}")
 
 
-@app.post("/api/proposta", response_model=PropostaResponse)
+@app.post("/api/proposta", response_model=PropostaResponseComplete)
 async def criar_proposta(dados: PropostaInput):
     """
     Cria uma nova proposta, salva no banco e retorna o link para visualização.
@@ -139,15 +140,17 @@ async def criar_proposta(dados: PropostaInput):
             dados_payback=dados_payback
         )
         
-        # Gerar URL da proposta
+        # Gerar URLs da proposta
         proposta_url = f"{BASE_URL}/proposta/{proposta_id}"
+        admin_url = f"{BASE_URL}/admin/proposta/{proposta_id}"
         
-        return PropostaResponse(
+        return PropostaResponseComplete(
             status="success",
             numero_proposta=numero_proposta,
             proposta_id=proposta_id,
             proposta_url=proposta_url,
-            message="Proposta criada com sucesso! Envie o link ao cliente."
+            admin_url=admin_url,
+            message="Proposta criada com sucesso! Envie o link ao cliente e acompanhe pelo link admin."
         )
         
     except ValueError as e:
@@ -255,6 +258,67 @@ async def visualizar_proposta(proposta_id: str, request: Request):
         raise HTTPException(
             status_code=500,
             detail=f"Erro ao carregar proposta: {str(e)}"
+        )
+
+
+@app.get("/admin/proposta/{proposta_id}", response_class=HTMLResponse)
+async def visualizar_admin_proposta(proposta_id: str):
+    """
+    Dashboard admin para acompanhar visualizações da proposta
+    """
+    if not db:
+        raise HTTPException(status_code=503, detail="Banco de dados não disponível")
+        
+    try:
+        # Buscar proposta
+        proposta = db.buscar_proposta(proposta_id)
+        if not proposta:
+            raise HTTPException(status_code=404, detail="Proposta não encontrada")
+        
+        # Buscar visualizações
+        visualizacoes = db.listar_visualizacoes(proposta_id)
+        
+        # Preparar contexto
+        contexto = {
+            "proposta_id": proposta_id,
+            "numero_proposta": proposta.get("numero_proposta", "N/A"),
+            "cliente_nome": proposta["cliente_nome"],
+            "investimento": proposta["dados_sistema"].get("investimento", 0),
+            "created_at": proposta.get("created_at"),
+            "total_visualizacoes": len(visualizacoes),
+            "visualizacoes": visualizacoes,
+            "proposta_url": f"{BASE_URL}/proposta/{proposta_id}"
+        }
+        
+        # Renderizar template admin
+        from jinja2 import Environment, FileSystemLoader
+        template_dir = os.path.join(os.path.dirname(__file__), 'app/web/templates')
+        env = Environment(loader=FileSystemLoader(template_dir))
+        
+        # Adicionar filtro de formatação
+        def format_datetime(value):
+            if not value:
+                return "N/A"
+            if isinstance(value, str):
+                from dateutil import parser
+                value = parser.parse(value)
+            return value.strftime("%d/%m/%Y %H:%M:%S")
+        
+        env.filters['format_datetime'] = format_datetime
+        
+        template = env.get_template('admin_dashboard.html')
+        html_content = template.render(contexto)
+        
+        return HTMLResponse(content=html_content)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Erro ao carregar dashboard admin: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao carregar dashboard: {str(e)}"
         )
 
 
