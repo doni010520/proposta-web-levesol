@@ -295,14 +295,24 @@ async def visualizar_admin_proposta(proposta_id: str):
         template_dir = os.path.join(os.path.dirname(__file__), 'app/web/templates')
         env = Environment(loader=FileSystemLoader(template_dir))
         
-        # Adicionar filtro de formatação
+        # Adicionar filtro de formatação com timezone Brasil
         def format_datetime(value):
             if not value:
                 return "N/A"
             if isinstance(value, str):
                 from dateutil import parser
                 value = parser.parse(value)
-            return value.strftime("%d/%m/%Y %H:%M:%S")
+            
+            # Converter UTC para horário de Brasília (UTC-3)
+            import pytz
+            utc_tz = pytz.UTC
+            brasil_tz = pytz.timezone('America/Sao_Paulo')
+            
+            if value.tzinfo is None:
+                value = utc_tz.localize(value)
+            
+            value_brasil = value.astimezone(brasil_tz)
+            return value_brasil.strftime("%d/%m/%Y %H:%M:%S")
         
         env.filters['format_datetime'] = format_datetime
         
