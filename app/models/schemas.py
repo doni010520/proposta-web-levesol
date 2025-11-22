@@ -42,6 +42,15 @@ class PropostaResponse(BaseModel):
     proposta_url: str
     message: str
 
+class PropostaResponseComplete(BaseModel):
+    """Resposta completa após criar proposta - inclui URL admin"""
+    status: str
+    numero_proposta: str
+    proposta_id: str
+    proposta_url: str
+    admin_url: str
+    message: str
+
 class VisualizacaoResponse(BaseModel):
     """Dados de uma visualização"""
     id: int
