@@ -106,16 +106,16 @@
         }
 
         .hero-logo {
-            max-width: 450px;
-            width: 80%;
+            max-width: 600px;
+            width: 85%;
             height: auto;
-            margin-bottom: 30px;
+            margin-bottom: var(--spacing-md);
             filter: drop-shadow(0 10px 20px rgba(14, 165, 233, 0.2));
         }
 
-        .hero h1 { font-size: 56px; margin-bottom: 10px; color: #2c3e50; }
+        .hero h1 { font-size: 56px; margin-bottom: var(--spacing-sm); color: #2c3e50; }
         .hero-sub { color: var(--solar-blue); font-size: 18px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: var(--spacing-lg); font-weight: 800; }
-        .proposal-id { background: #fff; color: var(--text-muted); padding: 8px 20px; border-radius: 20px; font-size: 14px; margin-bottom: var(--spacing-lg); border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); font-weight: 600; }
+        .proposal-id { background: #fff; color: var(--text-muted); padding: 8px 20px; border-radius: 20px; font-size: 14px; margin-bottom: var(--spacing-md); border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); font-weight: 600; display: inline-block; }
 
         /* DADOS */
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
@@ -231,18 +231,20 @@
 
     <!-- HERO -->
     <section class="hero">
-        <div class="proposal-id">PROPOSTA {{ numero_proposta }}</div>
-        
         <img src="/static/levesol_logo.png" 
              alt="LEVESOL" class="hero-logo">
-
-        <h1>{{ cliente.nome }}</h1>
+        
         <div class="hero-sub">Energia Solar Fotovoltaica</div>
-        <p style="color: var(--text-muted); font-weight: 500;">Transforme sol em economia e patrimônio.</p>
+        
+        <h1>{{ cliente.nome }}</h1>
+        
+        <div class="proposal-id">PROPOSTA {{ numero_proposta }}</div>
+        
+        <p style="color: var(--text-muted); font-weight: 500; margin-bottom: var(--spacing-xl);">Transforme sol em economia e patrimônio.</p>
     </section>
 
     <!-- DADOS -->
-    <section class="section" id="dados">
+    <section class="section" id="dados" style="padding-top: calc(var(--spacing-xl) * 1.5);">
         <h2 class="section-title">Dados da Proposta</h2>
         <div class="data-grid">
             <div class="data-box">
@@ -456,8 +458,8 @@
 
     <!-- CTA -->
     <div class="cta-footer" id="aceitar">
-        <h2 style="margin-bottom: 20px; font-size: 36px; color: #0C4A6E;">Pronto para economizar?</h2>
-        <p style="margin-bottom: 40px; color: var(--text-muted);">Ao clicar abaixo, você confirma o interesse nesta proposta.</p>
+        <h2 style="margin-bottom: var(--spacing-sm); font-size: 36px; color: #0C4A6E;">Pronto para economizar?</h2>
+        <p style="margin-bottom: var(--spacing-lg); color: var(--text-muted);">Ao clicar abaixo, você confirma o interesse nesta proposta.</p>
         
         <a href="https://wa.me/{{ cliente.telefone_limpo }}?text=Olá! Aceito a proposta {{ numero_proposta }} para {{ cliente.nome }}" 
            target="_blank" class="btn-large">
