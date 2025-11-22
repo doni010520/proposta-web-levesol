@@ -21,6 +21,17 @@ class HTMLGenerator:
         
         # Adiciona o filtro personalizado de moeda ao ambiente Jinja2
         self.env.filters['format_currency'] = self._format_currency_filter
+        self.env.filters['format_number'] = self._format_number_filter
+
+    def _format_number_filter(self, value):
+        """Filtro Jinja2 para formatar número no padrão BR (1.234,56) sem símbolo"""
+        try:
+            val_float = float(value)
+            formatted = "{:,.2f}".format(val_float)
+            formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+            return formatted
+        except (ValueError, TypeError):
+            return value
 
     def _clean_currency(self, value_str):
         """
