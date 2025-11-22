@@ -16,7 +16,6 @@ except:
 class HTMLGenerator:
     def __init__(self):
         # Define onde estão os templates
-        # Ajuste o caminho conforme necessário dependendo de onde roda o main.py
         self.template_dir = os.path.join(os.path.dirname(__file__), 'templates')
         self.env = Environment(loader=FileSystemLoader(self.template_dir))
         
@@ -24,17 +23,30 @@ class HTMLGenerator:
         self.env.filters['format_currency'] = self._format_currency_filter
 
     def _clean_currency(self, value_str):
-        """Converte string de moeda (R$ 1.200,00) para float (1200.00)"""
+        """
+        Converte string de moeda (R$ 1.200,00) para float (1200.00)
+        CORREÇÃO: Detecta se já é número e retorna direto
+        """
         if not value_str:
             return 0.0
+        
+        # SE JÁ FOR NÚMERO (int ou float), RETORNA DIRETO
+        if isinstance(value_str, (int, float)):
+            return float(value_str)
+        
         try:
-            # Remove R$ e espaços, e caracteres indesejados que podem vir da planilha
+            # Remove R$ e espaços
             s = str(value_str).replace("R$", "").replace(" ", "").strip()
+            
+            # Se NÃO tem vírgula, já é formato americano (ex: 1234.56 ou 3.5)
+            if "," not in s:
+                return float(s)
+            
+            # Se TEM vírgula, é formato BR (ex: 1.234,56)
             # Remove pontos de milhar e troca vírgula decimal por ponto
             s = s.replace(".", "").replace(",", ".")
             return float(s)
         except (ValueError, TypeError):
-            # print(f"Erro ao converter moeda: {value_str}") # Debug
             return 0.0
             
     def _format_currency_filter(self, value):
@@ -102,16 +114,13 @@ class HTMLGenerator:
                         dados_sistema[chave_sistema] = valor
 
         # Limpar números do sistema (converter para float/int)
-        for key in ['num_modulos', 'investimento', 'conta_antes', 'area_total', 'geracao_mensal', 'consumo_atual']:
+        for key in ['num_modulos', 'investimento', 'conta_antes', 'area_total', 'geracao_mensal', 'consumo_atual', 'potencia_kwp']:
             if key in dados_sistema:
                 dados_sistema[key] = self._clean_currency(dados_sistema[key])
         
-        # Tratamento especial para inteiros e floats de 1 casa
+        # Tratamento especial para inteiros
         if 'num_modulos' in dados_sistema:
             dados_sistema['num_modulos'] = int(dados_sistema['num_modulos'])
-        if 'potencia_kwp' in dados_sistema and isinstance(dados_sistema['potencia_kwp'], str):
-             dados_sistema['potencia_kwp'] = self._clean_currency(dados_sistema['potencia_kwp'])
-
 
         return dados_sistema, dados_payback
 
