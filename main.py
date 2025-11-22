@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 from dotenv import load_dotenv
 import os
@@ -10,14 +11,12 @@ import traceback
 load_dotenv()
 
 # Imports locais
-# Certifique-se de que app.models.schemas e app.db.database existem no seu projeto
 from app.models.schemas import (
     PropostaInput, 
     PropostaResponse, 
     EstatisticasResponse,
     VisualizacaoResponse
 )
-# Se não tiver Database mockada, comente a importação e o uso do db abaixo
 from app.db.database import Database
 from app.web.html_generator import HTMLGenerator
 
@@ -36,6 +35,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# CORREÇÃO: Servir arquivos estáticos (logo)
+app.mount("/static", StaticFiles(directory="app/assets"), name="static")
 
 # Inicializar componentes
 try:
@@ -76,7 +78,7 @@ def health_check():
         "service": "proposta-web-api"
     }
 
-# --- ENDPOINT NOVO: PREVIEW DIRETO (SEM BANCO) ---
+
 @app.post("/api/proposta/web", response_class=HTMLResponse)
 async def ver_proposta_web(dados: PropostaInput):
     """
@@ -105,7 +107,6 @@ async def ver_proposta_web(dados: PropostaInput):
         raise HTTPException(status_code=500, detail=f"Erro ao gerar página web: {str(e)}")
 
 
-# --- ENDPOINT DE CRIAÇÃO (COM BANCO) ---
 @app.post("/api/proposta", response_model=PropostaResponse)
 async def criar_proposta(dados: PropostaInput):
     """
@@ -128,7 +129,6 @@ async def criar_proposta(dados: PropostaInput):
         }
         
         # Extrair dados limpos para salvar no banco
-        # Nota: Usando _extract_data do html_generator para garantir consistência
         dados_sistema, dados_payback = html_generator._extract_data(dados.dados_completos)
         
         # Salvar no banco de dados
@@ -161,7 +161,6 @@ async def criar_proposta(dados: PropostaInput):
         )
 
 
-# --- ENDPOINT DE VISUALIZAÇÃO (RENDERIZA O HTML) ---
 @app.get("/proposta/{proposta_id}", response_class=HTMLResponse)
 async def visualizar_proposta(proposta_id: str, request: Request):
     """
@@ -195,13 +194,6 @@ async def visualizar_proposta(proposta_id: str, request: Request):
             print(f"Aviso: Falha ao registrar visualização: {str(e)}")
         
         # RECONSTRUÇÃO DOS DADOS
-        # O render_proposal espera o formato "raw" (como vem do JSON/Planilha)
-        # ou um dicionário estruturado. Como o render_proposal processa novamente,
-        # precisamos montar um payload que simule a entrada original ou ajustar o gerador.
-        #
-        # A estratégia aqui é reconstruir a estrutura que o render_proposal espera:
-        # { "cliente": {}, "dados_completos": [...] }
-        
         cliente_dict = {
             "nome": proposta["cliente_nome"],
             "cpf_cnpj": proposta["cliente_cpf_cnpj"],
@@ -211,7 +203,6 @@ async def visualizar_proposta(proposta_id: str, request: Request):
         }
         
         # Reconstruir 'dados_completos' baseados no que foi salvo no banco
-        # Isso garante que o _extract_data dentro do render_proposal funcione
         dados_completos_reconstruidos = []
         
         # 1. Adicionar dados de payback simulando linhas da planilha
